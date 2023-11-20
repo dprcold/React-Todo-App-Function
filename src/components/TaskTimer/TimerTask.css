@@ -1,0 +1,10 @@
+.timer-wrapper {
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .new-todo-form__timer {
+    margin-left: 2px;
+    width: 177px;
+  }
