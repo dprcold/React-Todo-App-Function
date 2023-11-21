@@ -15,7 +15,7 @@ const WorkerTimer = () => {
       const remainingTime = Math.max(endTime - Date.now(), 0);
       const minutes = Math.floor(remainingTime / (60 * 1000));
       const seconds = Math.floor((remainingTime % (60 * 1000)) / 1000);
-      console.log('tick')
+      console.log('tick');
       self.postMessage({ min: minutes, sec: seconds });
 
       if (isActive && remainingTime > 0) {

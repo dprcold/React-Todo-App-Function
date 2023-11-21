@@ -8,6 +8,16 @@ const formatNumber = (number) => {
   return number < 10 ? `0${number}` : number.toString();
 };
 
+const updTimeInLocalStorage = (id, min, sec) => {
+  const taskDataInLocalStorage = JSON.parse(localStorage.getItem('taskItem')) || [];
+  const taskToUpd = taskDataInLocalStorage.find((task) => task.id === id);
+  if (taskToUpd) {
+    taskToUpd.minutes = min;
+    taskToUpd.seconds = sec;
+    localStorage.setItem('taskItem', JSON.stringify(taskDataInLocalStorage));
+  }
+};
+
 export const Task = ({
   completed,
   createdDate,
@@ -29,12 +39,24 @@ export const Task = ({
   const [isRunning, setIsRunning] = useState(false);
   //мемоизируем, так как будет двойной рендер при инициализации и неправильное поведение таймера
   const timerWorker = useMemo(() => new Worker(worker_script), []);
+
   useEffect(() => {
+    const cleanUpFunction = () => {
+      timerWorker.terminate();
+    };
+    //запускаем воркер
     timerWorker.onmessage = ({ data: { min, sec } }) => {
       setWorkerMin(min);
       setWorkerSec(sec);
     };
+    //удаляем воркер с таски
+    return cleanUpFunction;
   }, [timerWorker]);
+
+  //апдейтим данные таймера в хранилище
+  useEffect(() => {
+    updTimeInLocalStorage(id, workerMin, workerSec);
+  }, [workerMin, workerSec]);
 
   const handleStartTimer = () => {
     if (!isRunning) {
@@ -52,10 +74,6 @@ export const Task = ({
 
   const handleInputChange = (event) => {
     setInputText(event.target.value);
-  };
-  const deleteTask = (id) => {
-    onDeleted(id);
-    timerWorker.terminate();
   };
 
   const handleInputKeyPress = (event) => {
@@ -126,7 +144,7 @@ export const Task = ({
             />
 
             <button className="icon icon-edit" onClick={() => setIsEditing(true)}></button>
-            <button className="icon icon-destroy" onClick={() => deleteTask(id)}></button>
+            <button className="icon icon-destroy" onClick={() => onDeleted(id)}></button>
           </>
         )}
       </label>
